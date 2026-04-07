@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landslide Risk Prediction</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-image: url("{{ url_for('static', filename='bg.jpg') }}"); /* Replace with your image path */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed; /* Makes background image stay fixed while scrolling */
+        }
+
+        .overlay {
+            background: rgba(255, 255, 255, 0.1); /* Semi-transparent overlay for readability */
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 20px;
+        }
+
+        .hero {
+            width: 100%;
+            padding: 30px 0;
+            color: #333;
+            font-size: 36px;
+            font-weight: bold;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .container {
+            width: 50%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 1s ease-in-out;
+            margin-bottom: 30px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 28px;
+            color: #222;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            font-weight: bold;
+            margin: 15px 0 5px;
+            color: #444;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: #28a745;
+            outline: none;
+        }
+
+        button {
+            background: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 15px;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            animation: slideIn 0.5s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .risk {
+            font-size: 22px;
+            color: red;
+            margin-top: 10px;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay">
+        <div class="hero">
+            Landslide Risk Prediction
+        </div>
+
+        <div class="container">
+            <h2>Enter Your Data</h2>
+            <form id="prediction-form">
+                <label for="slope">Slope Angle (°):</label>
+                <input type="number" id="slope" required>
+
+                <label for="elevation">Elevation (m):</label>
+                <input type="number" id="elevation" required>
+
+                <label for="rainfall">Rainfall (mm/day):</label>
+                <input type="number" id="rainfall" required>
+
+                <label for="moisture">Soil Moisture (%):</label>
+                <input type="number" id="moisture" required>
+
+                <label for="land_cover">Land Cover Type:</label>
+                <select id="land_cover" required>
+                    <option value="Forest">Forest</option>
+                    <option value="Urban">Urban</option>
+                    <option value="Agriculture">Agriculture</option>
+                </select>
+
+                <label for="distance">Distance To River (m):</label>
+                <input type="number" id="distance" required>
+
+                <label for="seismic">Seismic Activity (Richter):</label>
+                <input type="number" step="0.1" id="seismic" required>
+
+                <button type="submit">Predict</button>
+            </form>
+
+            <div id="result"></div>
+
+            <div class="footer">
+                <p>© 2023 Landslide Risk Prediction. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('prediction-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const data = {
+                Slope_Angle: document.getElementById('slope').value,
+                Elevation: document.getElementById('elevation').value,
+                Rainfall: document.getElementById('rainfall').value,
+                Soil_Moisture: document.getElementById('moisture').value,
+                Land_Cover_Type: document.getElementById('land_cover').value,
+                Distance_To_River: document.getElementById('distance').value,
+                Seismic_Activity: document.getElementById('seismic').value
+            };
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerHTML = `
+                    <p>${data.prediction}</p>
+                    <p class="risk">Risk Probability: ${data.risk_probability}%</p>
+                `;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+
+</body>
+</html>
